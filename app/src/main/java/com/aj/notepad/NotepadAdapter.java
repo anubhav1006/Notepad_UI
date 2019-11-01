@@ -7,10 +7,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
+import android.widget.Toast;
 import java.util.List;
 
-public class NotepadAdapter extends RecyclerView.Adapter<NotepadAdapter.ViewHolder> {
+public class NotepadAdapter extends RecyclerView.Adapter<NotepadAdapter.ViewHolder>{
 
     private Context context;
     private List<Notepad> list;
@@ -18,6 +18,12 @@ public class NotepadAdapter extends RecyclerView.Adapter<NotepadAdapter.ViewHold
     public NotepadAdapter(Context context, List<Notepad> list) {
         this.context = context;
         this.list = list;
+    }
+
+    public void updateData(List<Notepad> dataset) {
+        list.clear();
+        list.addAll(dataset);
+        notifyDataSetChanged();
     }
     @NonNull
     @Override
@@ -31,8 +37,10 @@ public class NotepadAdapter extends RecyclerView.Adapter<NotepadAdapter.ViewHold
         Notepad notepad = list.get(position);
 
         holder.textTitle.setText(notepad.getTitle());
-        holder.textText.setText(notepad.getText());
-        holder.textUser.setText(notepad.getUser());
+        //holder.textText.setText(notepad.getText());
+        holder.textUser.setText("By:- "+notepad.getUser());
+
+
     }
 
     @Override
@@ -40,14 +48,22 @@ public class NotepadAdapter extends RecyclerView.Adapter<NotepadAdapter.ViewHold
         return list.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+
         public TextView textTitle, textText, textUser;
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-
             textTitle = itemView.findViewById(R.id.main_title);
-            textText = itemView.findViewById(R.id.main_text);
+            //textText = itemView.findViewById(R.id.main_text);
             textUser = itemView.findViewById(R.id.main_user);
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            Notepad notepad = list.get(getAdapterPosition());
+
         }
     }
 }
