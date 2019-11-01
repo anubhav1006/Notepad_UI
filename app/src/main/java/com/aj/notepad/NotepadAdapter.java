@@ -1,6 +1,9 @@
 package com.aj.notepad;
 
 import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -48,7 +51,7 @@ public class NotepadAdapter extends RecyclerView.Adapter<NotepadAdapter.ViewHold
         return list.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{
 
         public TextView textTitle, textText, textUser;
 
@@ -64,6 +67,17 @@ public class NotepadAdapter extends RecyclerView.Adapter<NotepadAdapter.ViewHold
         public void onClick(View view) {
             Notepad notepad = list.get(getAdapterPosition());
 
+            Intent intent = new Intent(context, TextEditor.class);
+            intent.putExtra("Notepad", notepad);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            context.startActivity(intent);
+
+        }
+
+        @Override
+        public boolean onLongClick(View view) {
+            return false;
         }
     }
 }

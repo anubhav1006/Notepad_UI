@@ -52,7 +52,6 @@ public class MainActivity extends AppCompatActivity {
     private DividerItemDecoration dividerItemDecoration;
     private List<Notepad> notepadList;
     private NotepadAdapter adapter;
-    private String url = "http://192.168.31.100:8080/";
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
         swipeRefreshLayout.setOnRefreshListener(() -> new Handler().postDelayed(() -> {
             swipeRefreshLayout.setRefreshing(false);
             getUpdatedData();
-        }, 2000));
+        }, 1000));
 
 
 
@@ -89,9 +88,10 @@ public class MainActivity extends AppCompatActivity {
 
             AlertDialog builder = onCreateDialog(savedInstanceState);
             builder.show();
-
             adapter.notifyDataSetChanged();
+
         });
+        
 
     }
 
@@ -152,18 +152,7 @@ public class MainActivity extends AppCompatActivity {
         jsonRequest.put("text",text);
         jsonRequest.put("user",user);
 
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url + "/notepad/create", new JSONObject(jsonRequest), new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                Toast.makeText(MainActivity.this, String.valueOf(response), Toast.LENGTH_SHORT).show();
-
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(MainActivity.this, String.valueOf(error), Toast.LENGTH_SHORT).show();
-            }
-        });
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, getResources().getString(R.string.url) + "/notepad/create", new JSONObject(jsonRequest), response -> Toast.makeText(MainActivity.this, String.valueOf(response), Toast.LENGTH_SHORT).show(), error -> Toast.makeText(MainActivity.this, String.valueOf(error), Toast.LENGTH_SHORT).show());
         RequestQueue requestQueue = Volley.newRequestQueue(this);
         requestQueue.add(jsonObjectRequest);
 
@@ -173,8 +162,7 @@ public class MainActivity extends AppCompatActivity {
         final ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Loading...");
         progressDialog.show();
-
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,url+"notepads", null, response -> {
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,getResources().getString(R.string.url)+"notepads", null, response -> {
             for (int i = 0; i < response.length(); i++) {
                 try {
                     JSONObject jsonObject = response.getJSONObject(i);
@@ -208,12 +196,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getUpdatedData() {
-        final ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Loading...");
-        progressDialog.show();
+
         notepadList = new ArrayList<>();
 
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,url+"notepads", null, response -> {
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,getResources().getString(R.string.url)+"notepads", null, response -> {
             for (int i = 0; i < response.length(); i++) {
                 try {
                     JSONObject jsonObject = response.getJSONObject(i);
@@ -229,16 +215,13 @@ public class MainActivity extends AppCompatActivity {
                 } catch (JSONException e) {
                     Toast.makeText(MainActivity.this, e.getMessage(),Toast.LENGTH_LONG).show();
                     e.printStackTrace();
-                    progressDialog.dismiss();
                 }
             }
             adapter.updateData(notepadList);
             adapter.notifyDataSetChanged();
-            progressDialog.dismiss();
         }, error -> {
             Log.e("Errrrrrr",String.valueOf(error));
             Toast.makeText(MainActivity.this, String.valueOf(error),Toast.LENGTH_LONG).show();
-            progressDialog.dismiss();
         });
 
 
