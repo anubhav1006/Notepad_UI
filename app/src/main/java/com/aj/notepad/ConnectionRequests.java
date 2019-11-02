@@ -73,8 +73,8 @@ public class ConnectionRequests implements Connections {
         jsonRequest.put("user",user);
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, context.getResources().getString(R.string.url) + "/notepad/create", new JSONObject(jsonRequest),
-                response -> Toast.makeText(context, String.valueOf(response), Toast.LENGTH_SHORT).show(),
-                error -> Toast.makeText(context, String.valueOf(error), Toast.LENGTH_SHORT).show());
+                response -> {},
+                error -> {});
         RequestQueue requestQueue = Volley.newRequestQueue(context);
         requestQueue.add(jsonObjectRequest);
 
@@ -99,7 +99,7 @@ public class ConnectionRequests implements Connections {
                     notepadList.add(notepad);
                     //Toast.makeText(MainActivity.this, "Response",Toast.LENGTH_LONG).show();
                 } catch (JSONException e) {
-                    Toast.makeText(context, e.getMessage(),Toast.LENGTH_LONG).show();
+                    //Toast.makeText(context, e.getMessage(),Toast.LENGTH_LONG).show();
                     e.printStackTrace();
                     progressDialog.dismiss();
                 }
@@ -135,7 +135,7 @@ public class ConnectionRequests implements Connections {
                     notepad.setId(jsonObject.getLong("id"));
 
                     this.notepadList.add(notepad);
-                    Toast.makeText(context, "Response"+response,Toast.LENGTH_LONG).show();
+                    //Toast.makeText(context, "Response"+response,Toast.LENGTH_LONG).show();
                 } catch (JSONException e) {
                     Toast.makeText(context, e.getMessage(),Toast.LENGTH_LONG).show();
                     e.printStackTrace();
@@ -157,8 +157,15 @@ public class ConnectionRequests implements Connections {
     @Override
     public void deleteData(long id) {
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.DELETE, context.getResources().getString(R.string.url) + "/notepad/delete/"+id,null,
-                response -> Toast.makeText(context, String.valueOf(response), Toast.LENGTH_SHORT).show(),
-                error -> Toast.makeText(context, String.valueOf(error), Toast.LENGTH_SHORT).show());
+                response ->{
+
+                        //Toast.makeText(context, String.valueOf(response), Toast.LENGTH_SHORT).show();
+                },
+
+                error ->{
+                    Log.e("Error", String.valueOf(error));
+                    Toast.makeText(context, String.valueOf(error), Toast.LENGTH_SHORT).show();
+                });
         RequestQueue requestQueue = Volley.newRequestQueue(context);
         requestQueue.add(jsonObjectRequest);
     }
@@ -167,9 +174,25 @@ public class ConnectionRequests implements Connections {
     @Override
     public void updatetext(Notepad notepad) {
         long id = notepad.getId();
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.PUT, context.getResources().getString(R.string.url) + "notepad/update/"+id, new JSONObject((Map) notepad),
-                response ->
-                        Toast.makeText(context, "Response: "+response, Toast.LENGTH_SHORT).show(),
+        Map<String, String> jsonRequest = new HashMap<>();
+        jsonRequest.put("title",notepad.getTitle());
+        jsonRequest.put("text",notepad.getText());
+        jsonRequest.put("user",notepad.getUser());
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.PUT, context.getResources().getString(R.string.url) + "notepad/update/"+id, new JSONObject(jsonRequest),
+                response ->{},
+                        //Toast.makeText(context, "Response: "+response, Toast.LENGTH_SHORT).show(),
+                error ->
+                        Toast.makeText(context, "Error: "+error, Toast.LENGTH_SHORT).show());
+        RequestQueue requestQueue = Volley.newRequestQueue(context);
+        requestQueue.add(jsonObjectRequest);
+    }
+
+    @Override
+    public void deleteAll() {
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, context.getResources().getString(R.string.url) + "notepad/deleteAll", null,
+                response ->{},
+                        //Toast.makeText(context, "Response: "+response, Toast.LENGTH_SHORT).show(),
                 error ->
                         Toast.makeText(context, "Error: "+error, Toast.LENGTH_SHORT).show());
         RequestQueue requestQueue = Volley.newRequestQueue(context);

@@ -9,4 +9,5 @@ public interface Connections {
      void getUpdatedData(List<Notepad> notepadList);
      void deleteData(long id);
      void updatetext(Notepad notepad);
+     void deleteAll();
 }

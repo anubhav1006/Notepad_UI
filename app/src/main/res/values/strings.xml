@@ -5,4 +5,5 @@
     <string name="url">https://notepad1006.herokuapp.com/</string>
     <string name="cancel">Cancel</string>
     <string name="update">Update</string>
+    <string name="Enter">Enter</string>
 </resources>

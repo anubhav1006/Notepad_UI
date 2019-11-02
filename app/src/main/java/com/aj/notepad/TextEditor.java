@@ -79,6 +79,9 @@ public class TextEditor extends AppCompatActivity {
                 AlertDialog.Builder builder = new AlertDialog.Builder(TextEditor.this);
                 builder.setMessage("Unsaved Data. Are you sure want to cancel?").setPositiveButton("Yes", dialogClickListener)
                         .setNegativeButton("No", dialogClickListener).show();
+            }else{
+                Intent intent = new Intent(TextEditor.this, MainActivity.class);
+                startActivity(intent);
             }
 
         });
