@@ -1,13 +1,10 @@
 package com.aj.notepad;
 
-import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -15,37 +12,21 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
-import android.widget.Toast;
-
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
+
 
 public class MainActivity extends AppCompatActivity {
 
     private RecyclerView mList;
     final Context context = this;
     EditText et_new_title, et_new_user;
+    private Connections connections;
 
     SwipeRefreshLayout swipeRefreshLayout;
     private LinearLayoutManager linearLayoutManager;
@@ -60,10 +41,10 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         mList = findViewById(R.id.main_list);
-
         notepadList = new ArrayList<>();
 
         adapter = new NotepadAdapter(getApplicationContext(),notepadList);
+        connections = new ConnectionRequests(context, adapter);
 
         linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -73,12 +54,12 @@ public class MainActivity extends AppCompatActivity {
         mList.setLayoutManager(linearLayoutManager);
         mList.addItemDecoration(dividerItemDecoration);
         mList.setAdapter(adapter);
-        getData();
+        connections.getData(notepadList);
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.simpleSwipeRefreshLayout);
 
         swipeRefreshLayout.setOnRefreshListener(() -> new Handler().postDelayed(() -> {
             swipeRefreshLayout.setRefreshing(false);
-            getUpdatedData();
+            connections.getUpdatedData(notepadList);
         }, 1000));
 
 
@@ -91,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
             adapter.notifyDataSetChanged();
 
         });
-        
+
 
     }
 
@@ -113,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
 
                         String title = String.valueOf(et_new_title.getText());
                         String user = String.valueOf(et_new_user.getText());
-                        sendData(title, user, "");
+                        connections.sendData(title, user, "");
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -146,87 +127,5 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void sendData(String title, String user, String text){
-        Map<String, String> jsonRequest = new HashMap<>();
-        jsonRequest.put("title",title);
-        jsonRequest.put("text",text);
-        jsonRequest.put("user",user);
 
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, getResources().getString(R.string.url) + "/notepad/create", new JSONObject(jsonRequest), response -> Toast.makeText(MainActivity.this, String.valueOf(response), Toast.LENGTH_SHORT).show(), error -> Toast.makeText(MainActivity.this, String.valueOf(error), Toast.LENGTH_SHORT).show());
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        requestQueue.add(jsonObjectRequest);
-
-    }
-
-    private void getData() {
-        final ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Loading...");
-        progressDialog.show();
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,getResources().getString(R.string.url)+"notepads", null, response -> {
-            for (int i = 0; i < response.length(); i++) {
-                try {
-                    JSONObject jsonObject = response.getJSONObject(i);
-
-                    Notepad notepad = new Notepad();
-                    notepad.setTitle(jsonObject.getString("title"));
-                    notepad.setText(jsonObject.getString("text"));
-                    notepad.setUser(jsonObject.getString("user"));
-                    notepad.setId(jsonObject.getLong("id"));
-
-                    notepadList.add(notepad);
-                    //Toast.makeText(MainActivity.this, "Response",Toast.LENGTH_LONG).show();
-                } catch (JSONException e) {
-                    Toast.makeText(MainActivity.this, e.getMessage(),Toast.LENGTH_LONG).show();
-                    e.printStackTrace();
-                    progressDialog.dismiss();
-                }
-            }
-            adapter.notifyDataSetChanged();
-            progressDialog.dismiss();
-        }, error -> {
-            Log.e("Errrrrrr",String.valueOf(error));
-            Toast.makeText(MainActivity.this, String.valueOf(error),Toast.LENGTH_LONG).show();
-            progressDialog.dismiss();
-        });
-
-
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        requestQueue.add(jsonArrayRequest);
-
-    }
-
-    private void getUpdatedData() {
-
-        notepadList = new ArrayList<>();
-
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,getResources().getString(R.string.url)+"notepads", null, response -> {
-            for (int i = 0; i < response.length(); i++) {
-                try {
-                    JSONObject jsonObject = response.getJSONObject(i);
-
-                    Notepad notepad = new Notepad();
-                    notepad.setTitle(jsonObject.getString("title"));
-                    notepad.setText(jsonObject.getString("text"));
-                    notepad.setUser(jsonObject.getString("user"));
-                    notepad.setId(jsonObject.getLong("id"));
-
-                    notepadList.add(notepad);
-                    //Toast.makeText(MainActivity.this, "Response",Toast.LENGTH_LONG).show();
-                } catch (JSONException e) {
-                    Toast.makeText(MainActivity.this, e.getMessage(),Toast.LENGTH_LONG).show();
-                    e.printStackTrace();
-                }
-            }
-            adapter.updateData(notepadList);
-            adapter.notifyDataSetChanged();
-        }, error -> {
-            Log.e("Errrrrrr",String.valueOf(error));
-            Toast.makeText(MainActivity.this, String.valueOf(error),Toast.LENGTH_LONG).show();
-        });
-
-
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        requestQueue.add(jsonArrayRequest);
-
-    }
 }
