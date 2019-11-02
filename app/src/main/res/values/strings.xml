@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Notepad</string>
     <string name="action_settings">Settings</string>
+    <string name="create">Create</string>
+    <string name="url">http://192.168.31.100:8080/</string>
+    <string name="cancel">Cancel</string>
 </resources>

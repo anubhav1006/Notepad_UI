@@ -1,6 +1,8 @@
 package com.aj.notepad;
 
-public class Notepad {
+import java.io.Serializable;
+
+public class Notepad implements Serializable {
     String title;
     String text;
     Long notepad_id;
